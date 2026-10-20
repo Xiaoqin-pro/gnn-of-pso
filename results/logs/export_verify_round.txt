@@ -1,0 +1,22 @@
+[repro] ring  alpine1     n=10/10 maxdiff=0.000e+00 OK
+[repro] ring  griewank    n=10/10 maxdiff=0.000e+00 OK
+[repro] ring  rosenbrock  n=10/10 maxdiff=0.000e+00 OK
+[repro] ring  zakharov    n=10/10 maxdiff=0.000e+00 OK
+[repro] gbest alpine1     n=10/10 maxdiff=0.000e+00 OK
+[repro] gbest griewank    n=10/10 maxdiff=0.000e+00 OK
+[repro] gbest rosenbrock  n=10/10 maxdiff=0.000e+00 OK
+[repro] gbest zakharov    n=10/10 maxdiff=0.000e+00 OK
+[verdict] cgl_full_fixed       passed=False runtime_x=6.56 OK
+[verdict] sw_bandit_p05        passed=False runtime_x=1.78 OK
+[verdict] sw_fixed_p15         passed=False runtime_x=1.72 OK
+[verdict] sw_stall_t10_p05     passed=True  runtime_x=1.44 OK
+[verdict] recommended=sw_stall_t10_p05 stored=sw_stall_t10_p05
+[verdict] keep_online=False (must be False: the online bandit is dropped)
+[budget] pre             960,000 FEs
+[budget] main          2,400,000 FEs
+[budget] diagnostics     240,000 FEs
+[budget] total=3,600,000 / cap=3,800,000 OK
+
+PASS  bitwise reproducibility
+PASS  verdict reproduction
+PASS  budget ledger

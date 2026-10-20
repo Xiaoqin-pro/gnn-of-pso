@@ -1,0 +1,384 @@
+{
+  "reference": "ring",
+  "criteria": ">= 1 task(s) with paired median delta log10 < 0 vs ring; no task with delta > +0.5; runtime median <= 1.5x ring; the online variant must be better than the fixed variant to be kept",
+  "prefixes": [
+    "sw_fixed",
+    "sw_stall",
+    "sw_bandit",
+    "cgl_full"
+  ],
+  "per_candidate": {
+    "sw_fixed_p05": {
+      "kind": "sw_fixed",
+      "tasks_improved_vs_reference": 4,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 2.1045684090302985,
+      "mean_log10_error": 1.0769483973690528,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.23586473697895835,
+          "delta_median": -0.21068123516832837,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.03501974276655235,
+          "delta_median": -0.03546986016431099,
+          "wins": 3,
+          "losses": 0
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.02828954795139797,
+          "delta_median": -0.0806723578646833,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.1893691596534135,
+          "delta_median": -0.152320263547983,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    },
+    "sw_fixed_p15": {
+      "kind": "sw_fixed",
+      "tasks_improved_vs_reference": 3,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 2.2201494886996405,
+      "mean_log10_error": 0.9023490159558917,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.7463037427839763,
+          "delta_median": -0.7214616200056051,
+          "wins": 3,
+          "losses": 0
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.007809180123634518,
+          "delta_median": -0.006345976954276536,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.0757979061651181,
+          "delta_median": 0.03999392622148057,
+          "wins": 1,
+          "losses": 2
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_fixed_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.35702988393023743,
+          "delta_median": -0.3660954773671392,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    },
+    "sw_stall_t10_p05": {
+      "kind": "sw_stall",
+      "tasks_improved_vs_reference": 3,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 1.521736957994773,
+      "mean_log10_error": 1.1687483110279573,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.038213940767335385,
+          "delta_median": -0.007122086796459093,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.02838016897984567,
+          "delta_median": 0.0314728634799026,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.005041759643929833,
+          "delta_median": -0.030312663191118805,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.19297940210581413,
+          "delta_median": -0.24237402135543018,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    },
+    "sw_stall_t10_p15": {
+      "kind": "sw_stall",
+      "tasks_improved_vs_reference": 2,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 1.94321651068182,
+      "mean_log10_error": 1.1946789330733236,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p15",
+          "n_seeds": 3,
+          "delta_mean": 0.0958097961974173,
+          "delta_median": 0.09703934334319808,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.00800959374337645,
+          "delta_median": -0.0197351895242733,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p15",
+          "n_seeds": 3,
+          "delta_mean": 0.04590881507829847,
+          "delta_median": 0.006128297685401574,
+          "wins": 1,
+          "losses": 2
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_stall_t10_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.1513300620655773,
+          "delta_median": -0.13145887088152608,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    },
+    "sw_stall_t20_p05": {
+      "kind": "sw_stall",
+      "tasks_improved_vs_reference": 0,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 1.3958939512764794,
+      "mean_log10_error": 1.1980536831079134,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.04356442087606519,
+          "delta_median": 0.03327743136468997,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.004573842678383397,
+          "delta_median": 0.0,
+          "wins": 1,
+          "losses": 0
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.021875684710514005,
+          "delta_median": 0.004831630082568816,
+          "wins": 1,
+          "losses": 2
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.06498830730307607,
+          "delta_median": 0.014463515968591079,
+          "wins": 1,
+          "losses": 2
+        }
+      ]
+    },
+    "sw_stall_t20_p15": {
+      "kind": "sw_stall",
+      "tasks_improved_vs_reference": 2,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 1.7744233835572456,
+      "mean_log10_error": 1.1795866467445792,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p15",
+          "n_seeds": 3,
+          "delta_mean": 0.029638887823484967,
+          "delta_median": 0.026011992285669083,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p15",
+          "n_seeds": 3,
+          "delta_mean": 0.0031136102535863353,
+          "delta_median": -0.0023334357727030214,
+          "wins": 2,
+          "losses": 1
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p15",
+          "n_seeds": 3,
+          "delta_mean": 0.019065166500415637,
+          "delta_median": 0.003887051919542639,
+          "wins": 1,
+          "losses": 2
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_stall_t20_p15",
+          "n_seeds": 3,
+          "delta_mean": -0.12980785442570278,
+          "delta_median": -0.11077204214682856,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    },
+    "sw_bandit_p05": {
+      "kind": "sw_bandit",
+      "tasks_improved_vs_reference": 1,
+      "n_tasks": 4,
+      "tasks_collapsed": 0,
+      "median_runtime_factor": 2.315540643293922,
+      "mean_log10_error": 1.3539797379401897,
+      "passed": false,
+      "vs_reference": [
+        {
+          "task": "alpine1",
+          "reference": "ring",
+          "algorithm": "sw_bandit_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.09622633503192028,
+          "delta_median": 0.09410040386184693,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "griewank",
+          "reference": "ring",
+          "algorithm": "sw_bandit_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.4576513338398985,
+          "delta_median": 0.40484742007079183,
+          "wins": 0,
+          "losses": 3
+        },
+        {
+          "task": "rosenbrock",
+          "reference": "ring",
+          "algorithm": "sw_bandit_p05",
+          "n_seeds": 3,
+          "delta_mean": 0.19135876668264817,
+          "delta_median": 0.2887805946356985,
+          "wins": 1,
+          "losses": 2
+        },
+        {
+          "task": "zakharov",
+          "reference": "ring",
+          "algorithm": "sw_bandit_p05",
+          "n_seeds": 3,
+          "delta_mean": -0.12565426062024118,
+          "delta_median": -0.17589020926785404,
+          "wins": 3,
+          "losses": 0
+        }
+      ]
+    }
+  },
+  "online_vs_fixed": {
+    "best_fixed": "sw_fixed_p15",
+    "best_online": "sw_bandit_p05",
+    "fixed_mean_log10": 0.9023490159558917,
+    "online_mean_log10": 1.3539797379401897,
+    "keep_online": false,
+    "note": "if the fixed-probability version is at least as good, the online module is dropped"
+  },
+  "best_settings": {
+    "fixed": "sw_fixed_p15",
+    "stall": "sw_stall_t10_p05",
+    "online": "sw_bandit_p05"
+  },
+  "passing_candidates": [],
+  "any_candidate_passed": false
+}

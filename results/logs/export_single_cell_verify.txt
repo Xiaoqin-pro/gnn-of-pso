@@ -1,0 +1,15 @@
+re-ran 4 cells here (alpine1, seed 0, 30-D, 40 particles, 10,000 FEs)
+
+check 1 - anchor / reuse-only path (must match)
+   gldi_rule       dev10=0.838597  re-run=0.838597  delta=+0.00e+00  match=True
+
+check 2 - fixed implementation (must match the review-round artefact)
+   cgl_full_fixed  sw_main=1.235970  re-run=1.235970  delta=+0.00e+00  match=True
+
+check 3 - expected divergence for the pre-fix cells (mismatch is correct here)
+   cgl_full       dev10(pre-fix)=1.115213  re-run(fixed code)=1.224636  delta=+1.09e-01
+   cgl_nocontrib  dev10(pre-fix)=1.160373  re-run(fixed code)=1.281446  delta=+1.21e-01
+   these frozen pre-fix numbers are kept as historical evidence and are documented in docs/CGL_REVIEW_RESPONSE.md
+
+ANCHOR MATCHES: True
+EXPORT IS CONSISTENT WITH THE COMMITTED ARTEFACTS: True

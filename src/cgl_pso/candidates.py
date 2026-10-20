@@ -24,7 +24,7 @@ from cgl_pso._infra.objectives.base import Bounds
 
 __all__ = ["CandidateSet", "build_candidates", "CANDIDATE_SOURCES"]
 
-CANDIDATE_SOURCES = ("ring", "elite", "far", "random")
+CANDIDATE_SOURCES = ("ring", "elite", "far", "random", "self")
 _SOURCE_ID = {name: i for i, name in enumerate(CANDIDATE_SOURCES)}
 
 
@@ -54,6 +54,7 @@ def build_candidates(
     n_far_samples: int = 8,
     use_source_flags: dict[str, bool] | None = None,
     pbest_order: np.ndarray | None = None,
+    include_self: bool = False,
 ) -> CandidateSet:
     """Build the padded candidate set.
 
@@ -89,16 +90,28 @@ def build_candidates(
         span = bounds.span
         unit = position / span[None, :]
         dist = np.linalg.norm(unit[:, None, :] - unit[sample], axis=2)
-        dist[np.arange(n)[:, None], np.arange(m)[None, :]] = np.where(
-            sample == rows, np.inf, dist[np.arange(n)[:, None], np.arange(m)[None, :]]
-        )
-        far = sample[np.arange(n), np.argmax(dist, axis=1)][:, None]
+        # sampled self must be *excluded* from the argmax: a self-draw previously
+        # scored +inf and therefore won "farthest", after which the self-loop filter
+        # silently dropped the row's long-range slot. -inf fixes the semantics.
+        valid = sample != rows
+        dist = np.where(valid, dist, -np.inf)
+        pick = np.argmax(dist, axis=1)
+        has_valid = valid.any(axis=1)
+        fallback = (np.arange(n) + 1) % n          # only if every draw was self
+        far = np.where(has_valid, sample[np.arange(n), pick], fallback)[:, None]
         blocks.append(far)
         sources.append(np.full(far.shape, _SOURCE_ID["far"], dtype=np.int64))
     if flags["random"] and int(n_random) > 0:
         rand = rng.integers(0, n, size=(n, int(n_random)))
         blocks.append(rand)
         sources.append(np.full(rand.shape, _SOURCE_ID["random"], dtype=np.int64))
+
+    if include_self:
+        # inserted FIRST so the de-duplication keeps the explicit `self` label even
+        # when the same particle also appears in the ring/elite/far/random blocks
+        self_col = np.arange(n, dtype=np.int64)[:, None]
+        blocks.insert(0, self_col)
+        sources.insert(0, np.full(self_col.shape, _SOURCE_ID["self"], dtype=np.int64))
 
     if not blocks:  # degenerate configuration: fall back to the global best
         base = pbest_order if pbest_order is not None else np.argsort(pbest_val, kind="stable")
@@ -114,7 +127,8 @@ def build_candidates(
     # drop self-loops and later duplicates of an earlier slot (vectorised)
     earlier = np.arange(k)[None, None, :] < np.arange(k)[None, :, None]
     dup = np.any((idx[:, :, None] == idx[:, None, :]) & earlier, axis=2)
-    mask = (idx != rows) & (~dup)
+    self_ok = np.ones(idx.shape, dtype=bool) if include_self else (idx != rows)
+    mask = self_ok & (~dup)
     idx = np.where(mask, idx, 0)
     source = np.where(mask, source, -1)
     counts = mask.sum(axis=1)

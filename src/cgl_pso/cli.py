@@ -27,6 +27,7 @@ DEFAULT_CONFIGS = {
     "smoke": "configs/cgl/smoke.yaml",
     "dev10": "configs/cgl/dev10.yaml",
     "clip": "configs/cgl/clip.yaml",
+    "smallworld": "configs/cgl/smallworld.yaml",
 }
 
 
@@ -185,6 +186,80 @@ def report(
     from .reporting import build_cgl_report
 
     _print(build_cgl_report(results_dir=results_dir, docs_dir=docs_dir))
+
+
+@app.command()
+def smallworld(
+    config: Optional[Path] = typer.Option(None, "--config", "-c"),
+    stage: str = typer.Option("pre", "--stage", help="pre (3 seeds) | main (10 seeds)"),
+    out_dir: Path = typer.Option(Path("results"), "--out-dir"),
+    fes: Optional[int] = typer.Option(None, "--fes"),
+    diagnostics: bool = typer.Option(False, "--diagnostics", help="also aggregate selection-composition statistics"),
+    sets: Optional[list[str]] = typer.Option(None, "--set", "-s"),
+) -> None:
+    """Ring-SmallWorld-PSO screening: ring base topology + sparse non-local elite links.
+
+    ``--stage pre`` runs the pre-trial settings from the config (3 paired seeds);
+    ``--stage main`` selects the best fixed / stall setting from the pre-trial and runs
+    the 10-seed development comparison (ring, gbest, best-fixed, best-stall, bandit,
+    fixed-formula CGL).  Results never overwrite the earlier CGL screening.
+    """
+    import pandas as pd
+
+    from .runner import build_policy_for, run_sweep, selection_diagnostics
+
+    cfg = _load(config, "smallworld", sets)
+    tasks = tuple(cfg.get_path("smallworld.tasks"))
+    dim = int(cfg.get_path("smallworld.dim", 30))
+    particles = int(cfg.get_path("smallworld.particles", 40))
+    fes = int(fes or cfg.get_path("smallworld.fes", 10_000))
+
+    if stage == "pre":
+        raw_settings = cfg.get_path("smallworld.pre_trial.settings", [])
+        seeds = tuple(cfg.get_path("smallworld.pre_trial.seeds", [0, 1, 2]))
+        tag = "sw_pretrial"
+    elif stage == "main":
+        raw_settings = cfg.get_path("smallworld.main.settings", None)
+        if not raw_settings:
+            pre_path = Path(out_dir) / "cgl" / "sw_pretrial" / "runs.csv"
+            if not pre_path.exists():
+                raise typer.BadParameter("run `--stage pre` first (no pre-trial results found)")
+            pre = pd.read_csv(pre_path)
+            means = pre.groupby("algorithm")["log10_error"].mean()
+            kinds = pre.groupby("algorithm")["kind"].first()
+            best_fixed = means[[a for a in means.index if kinds[a] == "sw_fixed"]].idxmin()
+            best_stall = means[[a for a in means.index if kinds[a] == "sw_stall"]].idxmin()
+            cfg_by_label = {s["label"]: s for s in cfg.get_path("smallworld.pre_trial.settings", [])}
+            def spec_from(label: str) -> tuple:
+                src = cfg_by_label[label]
+                return (label, src["kind"], {k: v for k, v in src.items() if k not in ("label", "kind")})
+            raw_settings = [
+                {"label": "ring", "kind": "ring"},
+                {"label": "gbest", "kind": "gbest"},
+                dict(cfg_by_label[best_fixed]),
+                dict(cfg_by_label[best_stall]),
+                dict(cfg_by_label["sw_bandit_p05"]),
+                {"label": "cgl_full_fixed", "kind": "cgl_full"},
+            ]
+            typer.echo(f"selected on the pre-trial: fixed={best_fixed}, stall={best_stall}")
+        seeds = tuple(cfg.get_path("smallworld.main.seeds", list(range(10))))
+        tag = "sw_main"
+    else:
+        raise typer.BadParameter("--stage must be 'pre' or 'main'")
+
+    specs = [(s["label"], s["kind"], {k: v for k, v in s.items() if k not in ("label", "kind")}) for s in raw_settings]
+    result = run_sweep(cfg, specs=specs, tasks=tasks, seeds=seeds, dim=dim, n_particles=particles,
+                       fes=fes, out_dir=out_dir, tag=tag)
+    summary = result.summary
+    payload = {k: v for k, v in summary.items() if k != "artifacts"}
+    if diagnostics:
+        diag = selection_diagnostics(cfg, specs=specs, tasks=tasks, seeds=seeds[:2], dim=dim,
+                                     n_particles=particles, fes=fes)
+        diag_path = Path(out_dir) / "cgl" / tag / "selection_diagnostics.csv"
+        diag.to_csv(diag_path, index=False)
+        payload["selection_diagnostics"] = str(diag_path)
+        payload["selection_summary"] = diag.groupby("algorithm").mean(numeric_only=True).round(4).to_dict()
+    _print(payload)
 
 
 @app.command("clip-prepare")

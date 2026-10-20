@@ -1,0 +1,14 @@
+{
+  "candidate": "cgl_full",
+  "ablation": "cgl_nocontrib",
+  "criterion": ">= 3/0 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+  "tasks_improved_vs_ablation": 0,
+  "n_tasks": 0,
+  "tasks_clearly_worse_than_classics": 0,
+  "median_runtime_factor_vs_classics": null,
+  "passed": false,
+  "vs_ablation": [],
+  "vs_classics": [],
+  "applicable": false,
+  "note": "cgl_full / cgl_nocontrib are not both present in this sweep, so the CGL development gate was not evaluated here; see smallworld_verdict.json for the screening that this sweep does evaluate"
+}

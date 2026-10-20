@@ -24,6 +24,53 @@
 - 在线贡献图的**诊断方法**（贡献项离散度、决策翻转率、共性分量剔除）——这些诊断揭示了「决策被大幅改变但结果无改善」这一关键失败模式；
 - 合成 logits 的 CLIP 校准 smoke 全流程（见 `docs/CGL_CLIP_APPLICATION.md`）。
 
+---
+
+## 审查后补充（2026-10-20）：实现修复 + Ring-SmallWorld 机制判定
+
+### A. 四项实现问题的修复不改变 CGL 判定
+
+审查指出的三处实现问题（`global_gain` 误用 `max`、停滞惩罚缺 `stalled` 掩码、
+最远邻居 `argmax` 把 self 置 `+inf`）已修复并补回归测试，self 候选也改成了显式开关。
+逐条 before/after 与测试见 `docs/CGL_REVIEW_RESPONSE.md`。
+
+用修复后的代码在**相同的 4 任务 × 10 配对种子 × 30D × 40 粒子 × 10,000 FEs**
+上重跑（`results/cgl/sw_main/`，标签 `cgl_full_fixed`）：
+
+| 任务 | ring（重跑，逐位等于 dev10） | gbest（重跑，逐位等于 dev10） | cgl_full（修复前） | cgl_full_fixed（修复后） |
+|---|---|---|---|---|
+| alpine1 | 0.842 | 0.523 | 1.195 | 1.211 |
+| griewank | 0.070 | -0.717 | 1.187 | 1.145 |
+| rosenbrock | 1.990 | 1.673 | 2.145 | 2.173 |
+| zakharov | 1.893 | 1.418 | 1.723 | 1.744 |
+| 均值 | 1.198 | 0.724 | 1.5627 | 1.5683 |
+
+**结论：修复后 CGL 表现基本不变（均值 +0.006），"停止 CGL 机制路线"的判定维持。**
+
+### B. Ring-SmallWorld-PSO：只有"停滞触发"版本通过低开销门槛
+
+预注册判据：相对 ring ≥1 个任务改善、无任务劣化 > +0.5、运行时间 ≤1.5×。
+
+| 候选 | 改善任务数 | 崩塌 | 运行时间倍数 | 判定 |
+|---|---|---|---|---|
+| `sw_fixed_p15` | 4/4 | 0 | **1.72×** | ✗ 超时（但方向最一致） |
+| `sw_stall_t10_p05` | 2/4 | 0 | **1.44×** | ✅ 唯一通过，推荐 |
+| `sw_bandit_p05` | 1/4 | 0 | 1.78× | ✗ 在线学习无净收益 |
+| `cgl_full_fixed` | 1/4 | 1 | 6.56× | ✗ |
+
+* 收益几乎全部来自 zakharov（各 small-world 变体 10W/0L），
+  griewank/rosenbrock 上最好也只是打平；**不得**把本轮说成"小世界拓扑显著优于 ring"；
+* `p=0.15` 的固定连接把末端多样性从 0.085 压到 0.034（近腰斩），这是它的隐性代价；
+* 在线 bandit 模块按预注册规则**删除**（固定版 1.035 < 在线版 1.278）。
+
+### C. 建议的下一步（尚未执行）
+
+1. 若继续 small-world 方向：先做 `τ ∈ {5,10,20}` 的敏感性预试验，
+   再考虑在 CEC2022 子集上验证（需另行批准预算）；
+2. 无论哪条路线，**都应先通过"低开销 + 不损伤"门槛**，
+   再讨论是否值得引入 GNN/PPO 这类高开销决策器；
+3. 完整结果、预算账本与局限见 `docs/CGL_SMALLWORLD_RESULTS_zh.md`。
+
 ## 复现命令
 
 ```bash
@@ -31,4 +78,6 @@ python -m cgl_pso doctor
 python -m cgl_pso smoke -c configs/cgl/smoke.yaml
 python -m cgl_pso dev10 -c configs/cgl/dev10.yaml
 python -m cgl_pso report
+python -m cgl_pso smallworld -c configs/cgl/smallworld.yaml --stage pre --diagnostics
+python -m cgl_pso smallworld -c configs/cgl/smallworld.yaml --stage main
 ```

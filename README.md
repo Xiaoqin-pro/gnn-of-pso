@@ -34,6 +34,49 @@ Per-task `mean log10(error + 1e-8)` (10 seeds, 30-D, 10,000 FEs):
 | rosenbrock | 1.990 | 1.673 | **1.613** | 2.181 | 2.200 | 2.145 |
 | zakharov | 1.893 | **1.418** | 1.602 | 1.745 | 1.758 | 1.723 |
 
+## Review round (2026-10-20): implementation fixes + Ring-SmallWorld-PSO
+
+A static review of this repository at commit `082ce2f` found three implementation bugs and one
+design choice worth ablating. All four are fixed here with regression tests; the before/after
+record is in `docs/CGL_REVIEW_RESPONSE.md`.
+
+| item | before | after |
+|---|---|---|
+| global-best gain used `max(pbest)` on a minimisation problem | `max(pbest) - max(pbest)` | `min(pbest) - min(pbest)` |
+| stagnation penalty ignored the `stalled` mask | penalised every particle's recent unproductive edges | `bad_edge &= stalled[:, None]` |
+| the "farthest" candidate scored a self-draw as `+inf` | self won the `argmax`, then the self-loop filter dropped the slot | self scored `-inf`, deterministic fallback when every draw is self |
+| CGL forbade self-pbest candidates while `ring` allows them | hard-coded | `allow_self_candidate` switch (default off) |
+
+Re-running 4 tasks x 10 paired seeds x 30-D x 40 particles x 10,000 FEs shows the fixes do **not**
+rescue CGL: mean log10(error+1e-8) moves from 1.5627 (pre-fix) to 1.5683 (fixed), still clearly
+worse than `ring` (1.199) and `gbest` (0.724) and still 6.56x slower. `ring`/`gbest` reproduce the
+frozen dev10 values **bit-for-bit**, so that comparison is clean (`scripts/cgl_sw_verify_repro.py`).
+
+The same review asked for a lightweight **Ring-SmallWorld-PSO** prototype - no GNN, no PPO, no
+reward matrix, no sub-swarms: the verified ring topology plus a sparse non-local elite link used
+with probability `p`, either always (`fixed`), only for stalled particles (`stall`), or adjusted
+online from realised feedback (`bandit`).
+
+| task | ring | gbest | `sw_fixed_p15` | `sw_stall_t10_p05` | `sw_bandit_p05` | `cgl_full_fixed` |
+|---|---|---|---|---|---|---|
+| alpine1 | 0.842 | **0.523** | 0.642 | 0.749 | 0.893 | 1.211 |
+| griewank | 0.070 | **-0.717** | 0.048 | 0.075 | 0.543 | 1.145 |
+| rosenbrock | 1.990 | **1.673** | 1.878 | 2.005 | 2.004 | 2.173 |
+| zakharov | 1.893 | **1.418** | 1.571 | 1.753 | 1.671 | 1.744 |
+| **mean** | 1.199 | **0.724** | 1.035 | 1.146 | 1.278 | 1.568 |
+
+* pre-registered gate: >= 1 task improved vs `ring`, no task collapsed (> +0.5), runtime <= 1.5x,
+  and the online variant must beat the fixed one to be kept;
+* `sw_stall_t10_p05` (tau=10, p=0.05) is the **only** setting that passes (2/4 tasks improved,
+  1.44x runtime); `sw_fixed_p15` improves 4/4 but costs 1.72x and halves swarm diversity
+  (0.085 -> 0.034); `sw_bandit_p05` helps 1/4, so the **online module is dropped**;
+* honest framing: the gain is concentrated on `zakharov` (10W/0L for every small-world variant)
+  while griewank/rosenbrock at best tie - this is "cheap long-range links do not hurt", **not**
+  "small-world beats ring";
+* budget ledger: 960k (pre-trial) + 240k (selection diagnostics) + 2.4M (main) = **3.6M of the
+  3.8M cap**. No CEC suite, no 30-seed expansion, no real CLIP run; limits are listed in
+  `docs/CGL_SMALLWORLD_RESULTS_zh.md`.
+
 **Application appendix (CLIP)**: the real frozen-VLM experiment was **not started** (the core gate
 failed and weight downloads require permission). A complete **synthetic-logits calibration smoke**
 is included instead — 8 methods, unified 2,000 objective evaluations, selection on the dev split
@@ -47,13 +90,14 @@ src/cgl_pso/
   contribution.py    M1: online contribution graph (exhaustive unit tests)
   candidates.py      sparse candidate construction (vectorised)
   policy.py          CGL variants + policy factory
+  smallworld.py      Ring-SmallWorld-PSO prototype (fixed / stall / bandit links)
   baselines.py       fixed-score rule reference (no feedback)
   runner.py          pilot / pre-registered dev10 screening, statistics, figures
   clip_app.py        frozen-VLM application appendix (synthetic smoke + gated real backends)
   reporting.py       regenerates the result/decision documents from the artefacts
   cli.py             cgl doctor|smoke|dev10|report|clip-prepare|clip-optimize|clip-evaluate-final
   _infra/            trimmed, mechanically renamed subset of the reused, verified infrastructure
-configs/cgl/         smoke.yaml, dev10.yaml, clip.yaml
+configs/cgl/         smoke.yaml, dev10.yaml, clip.yaml, smallworld.yaml
 results/cgl/         raw JSONL/CSV, paired tables, figures (PNG+SVG), resource logs
 docs/CGL_*.md        literature matrix, method, protocol, results, decision, CLIP appendix
 tests/               candidates/graph updates/temporal causality/FE accounting/budget/CLIP splits
@@ -70,7 +114,7 @@ torch, `torch` stays a dependency even though the algorithm itself is pure NumPy
 ```bash
 python -m venv .venv
 .venv/Scripts/pip install -e ".[dev]"      # Linux/macOS: .venv/bin/pip
-python -m pytest tests -q                  # 36 tests
+python -m pytest tests -q                  # 56 tests
 
 cgl doctor
 cgl dev10 -c configs/cgl/dev10.yaml --pilot        # pilot scale (3 seeds x 3 tasks x 5,000 FEs)
@@ -92,6 +136,8 @@ cgl clip-evaluate-final -c configs/cgl/clip.yaml
 | `docs/CGL_PROTOCOL.md` | pre-registered tasks/seeds/instances, fairness contract, budget ledger, gates, resource policy |
 | `docs/CGL_RESULTS_zh.md` | auto-generated: pilot, main screening, repair round, mechanism statistics, AUC, runtime, budget overspend, CLIP smoke |
 | `docs/CGL_DECISION.md` | the explicit STOP verdict with its four evidence points and the reusable outcomes |
+| `docs/CGL_REVIEW_RESPONSE.md` | the 2026-10-20 review: four findings, before/after code, regression tests, effect on the verdict |
+| `docs/CGL_SMALLWORLD_RESULTS_zh.md` | Ring-SmallWorld-PSO: pre-trial, selection diagnostics, main screening, budget ledger, limits |
 | `docs/CGL_CLIP_APPLICATION.md` | application design, why the real CLIP run was not started, synthetic smoke results |
 
 ## Reused infrastructure vs. this work
@@ -109,20 +155,32 @@ Provenance is stated explicitly so nothing is mis-attributed:
 
 ## Export verification (why the numbers here are trustworthy)
 
-`scripts/verify_export.py` re-runs three single cells of the committed screening
-(`alpine1`, seed 0: `gldi_rule`, `cgl_full`, `cgl_nocontrib`) inside this repository and compares
-them with `results/cgl/dev10/runs.csv`:
+`scripts/verify_export.py` re-runs four single cells of the committed screenings
+(`alpine1`, seed 0: `gldi_rule`, `cgl_full_fixed`, `cgl_full`, `cgl_nocontrib`) inside this
+repository, on the same instance/initialisation/budget, and compares them with the artefacts:
 
-| algorithm | committed log10(error+eps) | exported-code log10 | match |
+| check | committed | re-run here | outcome |
 |---|---|---|---|
-| `gldi_rule` | 0.838597 | 0.838597 | exact |
-| `cgl_full` | 1.115213 | 1.115213 | Δ = 2.2e-16 |
-| `cgl_nocontrib` | 1.160373 | 1.160373 | exact |
+| reuse-only anchor `gldi_rule` vs `results/cgl/dev10` | 0.838597 | 0.838597 | **exact** |
+| fixed code `cgl_full_fixed` vs `results/cgl/sw_main` | 1.235970 | 1.235970 | **exact** |
+| pre-fix `cgl_full` (dev10, frozen) | 1.115213 | 1.224636 | differs by design |
+| pre-fix `cgl_nocontrib` (dev10, frozen) | 1.160373 | 1.281446 | differs by design |
 
-The export therefore contains the same algorithm behaviour as the run that produced the results
-(the only differences are the import prefix and the self-contained rule baseline).
+The first two rows are the verification: the reuse-only path is bit-stable, and the fixed
+implementation reproduces the recorded review-round cell. The last two rows are shown on purpose
+- they are the pre-fix cells the review flagged, kept as historical evidence and deliberately not
+reproducible by the fixed code.
+
+`scripts/cgl_sw_verify_repro.py` adds a **zero-FE** check on the committed artefacts: `ring`/`gbest`
+of the review round match the frozen dev10 values bit-for-bit, the small-world verdict recomputes
+to the same recommendation, and the budget ledger stays inside its cap.
+`scripts/cgl_sw_resummarise.py` regenerates `summary.json` / `smallworld_verdict.json` from the raw
+`runs.jsonl` without re-running anything.
+
 Two robustness bugs found by this verification were fixed in the screening's verdict helper
-(subset runs without classic baselines no longer crash on `pd.concat([])` / missing columns).
+(subset runs without classic baselines no longer crash on `pd.concat([])` / missing columns, and
+such runs now mark the CGL gate explicitly as `"applicable": false` instead of reporting a plain
+failure).
 
 ## License
 

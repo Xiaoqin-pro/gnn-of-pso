@@ -73,6 +73,7 @@ class CGLPolicy:
         n_random: int = 2,
         n_far_samples: int = 8,
         candidate_sources: dict[str, bool] | None = None,
+        allow_self_candidate: bool = False,
         record: bool = True,
     ) -> None:
         if variant not in CGL_POLICIES:
@@ -109,6 +110,10 @@ class CGLPolicy:
         # particles towards distant, poor targets and destroy the exploitation the
         # classical ring topology provides; disabling them is a single-factor change.
         self.candidate_sources = dict(candidate_sources or {})
+        # `ring` allows the neighbourhood best to be the particle itself; the CGL
+        # candidate builder removed self entirely. This switch makes the difference
+        # an explicit ablation instead of an unconditional design choice.
+        self.allow_self_candidate = bool(allow_self_candidate)
         self.record = bool(record)
 
         self.graph: ContributionGraph | None = None
@@ -165,7 +170,9 @@ class CGLPolicy:
             # relative to what the rest of the swarm achieved in the same iteration
             d_fit = d_fit - float(np.mean(d_fit))
             d_pbest = d_pbest - float(np.mean(d_pbest))
-        global_gain = float(np.max(self._pending.pbest_val) - np.max(state.pbest_val))
+        # minimisation problem: the global-best improvement is min(pbest) before
+        # minus min(pbest) after (using max measured the *worst* particle instead)
+        global_gain = float(np.min(self._pending.pbest_val) - np.min(state.pbest_val))
         gain = (w_f * d_fit + w_p * d_pbest + w_g * global_gain) / scale
         report = self.graph.feedback(gain, iteration=state.iteration)
         self._pending.valid = False
@@ -219,6 +226,9 @@ class CGLPolicy:
             unproductive = self.graph.unproductive()
             recent = self.graph.recency(state.iteration) <= max(self.stall_threshold, 1)
             bad_edge = unproductive[np.arange(n)[:, None], candidates.idx] & recent[np.arange(n)[:, None], candidates.idx]
+            # M3 is *stagnation triggered*: a particle that keeps improving must not
+            # have its historical edges penalised (the mask was previously missing)
+            bad_edge = bad_edge & stalled[:, None]
             penalty = np.where(bad_edge, self.refresh_penalty, 0.0)
             score = score - penalty
             eps = np.where(stalled, self.epsilon_stalled, eps)
@@ -279,6 +289,7 @@ class CGLPolicy:
             n_random=self.n_random, n_far_samples=self.n_far_samples,
             pbest_order=order,
             use_source_flags=self.candidate_sources or None,
+            include_self=self.allow_self_candidate,
         )
         score, eps, diag = self._score_candidates(state, candidates, stalled=stalled, ranks=ranks)
         slot, probs = self._sample(score, eps, candidates.mask, self.rng, self.temperature)
@@ -303,6 +314,20 @@ class CGLPolicy:
         if self.use_refresh and bool(stalled.any()):
             self._refresh_events.append({"iteration": int(state.iteration), "n_stalled": int(stalled.sum())})
 
+        # ---- selection-composition diagnostics (review request) ----------------
+        order_final = np.argsort(state.pbest_val, kind="stable")
+        rank_of_final = np.empty(state.n, dtype=np.float64)
+        rank_of_final[order_final] = np.arange(state.n)
+        global_best = int(order_final[0])
+        radii = np.arange(-1, 2)
+        neigh = (np.arange(state.n)[:, None] + radii[None, :]) % state.n
+        ring_best = neigh[np.arange(state.n), np.argmin(state.pbest_val[neigh], axis=1)]
+        sel = {
+            "sel_global_elite_share": float(np.mean(target == global_best)),
+            "sel_ring_elite_share": float(np.mean(target == ring_best)),
+            "sel_self_share": float(np.mean(target == np.arange(state.n))),
+            "sel_mean_rank": float(np.mean(rank_of_final[target] / max(state.n - 1, 1))),
+        }
         stats = self.graph.stats()
         aux = {
             "cgl_edges_tried": float(stats["edges_tried"]),
@@ -314,6 +339,7 @@ class CGLPolicy:
             "cgl_refresh_events": float(len(self._refresh_events)),
             "cgl_select_ms": float(update_ms),
             "cgl_selection_entropy": mean_entropy,
+            **sel,
             **diag,
             **feedback,
         }
@@ -326,6 +352,7 @@ class CGLPolicy:
         return {
             "variant": self.variant,
             "candidate_sources": self.candidate_sources,
+            "allow_self_candidate": self.allow_self_candidate,
             "alpha": self.alpha, "beta": self.beta, "gamma": self.gamma, "novelty": self.novelty,
             "use_refresh": self.use_refresh,
             "graph": self.graph.stats(),

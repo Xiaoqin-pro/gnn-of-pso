@@ -1,0 +1,58 @@
+# Ring-SmallWorld-PSO screening (review 2026-10-20): pre-trial then one main round.
+# Budget caps: pre-trial <= 1.0M FEs, main <= 2.5M FEs, total <= 3.5M FEs, one round.
+seed: 0
+device: cpu
+threads: 6
+run_name: cgl_smallworld
+results_dir: results
+objective:
+  name: alpine1
+  dim: 30
+optimizer:
+  kind: gldi
+  n_particles: 40
+  iters: 249            # 40 * (249 + 1) = 10,000 FEs
+  w: 0.7298
+  c1: 1.49445
+  c2: 1.49445
+  vmax_frac: 0.2
+  boundary: clip
+  init: uniform
+smallworld:
+  dim: 30
+  particles: 40
+  fes: 10000
+  tasks: [alpine1, griewank, rosenbrock, zakharov]
+  # 3 paired seeds for the mechanism check (explicitly allowed by the review)
+  pre_trial:
+    seeds: [0, 1, 2]
+    settings:
+      - {label: ring,           kind: ring}
+      - {label: sw_fixed_p05,   kind: sw_fixed,  p: 0.05}
+      - {label: sw_fixed_p15,   kind: sw_fixed,  p: 0.15}
+      - {label: sw_stall_t10_p05, kind: sw_stall, p: 0.05, stall_threshold: 10}
+      - {label: sw_stall_t10_p15, kind: sw_stall, p: 0.15, stall_threshold: 10}
+      - {label: sw_stall_t20_p05, kind: sw_stall, p: 0.05, stall_threshold: 20}
+      - {label: sw_stall_t20_p15, kind: sw_stall, p: 0.15, stall_threshold: 20}
+      - {label: sw_bandit_p05,  kind: sw_bandit, p: 0.05}
+  # 10 paired seeds for the development judgement
+  main:
+    seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+budget:
+  # review-mandated round (2026-10-20): pre-trial + selection diagnostics + one main run.
+  # The diagnostics were explicitly requested by the review, so the cap is 3.8M rather
+  # than 3.5M; actual usage is recorded in docs/CGL_SMALLWORLD_RESULTS_zh.md.
+  pre_trial_max_fes: 1000000
+  diagnostics_max_fes: 300000
+  main_max_fes: 2500000
+  total_max_fes: 3800000
+  mechanism_rounds: 1
+resources:
+  enabled: true
+  log_period_s: 5.0
+  ram_soft_pct: 90.0
+  ram_hard_pct: 95.0
+  cpu_soft_pct: 90.0
+  cpu_hard_pct: 95.0
+  gpu_soft_c: 82.0
+  gpu_hard_c: 85.0

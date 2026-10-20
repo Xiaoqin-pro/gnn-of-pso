@@ -64,7 +64,10 @@ def test_candidate_sources_cover_ring_elite_far_random() -> None:
     rng = np.random.default_rng(3)
     cs = build_candidates(rng.random((30, 6)), rng.random(30), make_function("sphere", 6, seed=0).bounds, rng)
     seen = set(np.unique(cs.source[cs.mask]).tolist())
-    assert seen == set(range(len(CANDIDATE_SOURCES))), cs.to_dict()
+    expected = {CANDIDATE_SOURCES.index(name) for name in ("ring", "elite", "far", "random")}
+    assert seen == expected, cs.to_dict()
+    # `self` is an explicit opt-in ablation, not part of the default candidate set
+    assert CANDIDATE_SOURCES.index("self") not in seen
 
 
 def test_candidate_builder_respects_source_flags() -> None:
@@ -141,7 +144,8 @@ def test_feedback_is_temporally_causal() -> None:
     d_fit = d_fit - np.mean(d_fit)                       # common-mode removal
     d_pbest = prev_pbest - select_time_pbest
     d_pbest = d_pbest - np.mean(d_pbest)
-    global_gain = float(np.max(prev_pbest) - np.max(select_time_pbest))
+    # minimisation: the global-best improvement is min(pbest) before minus after
+    global_gain = float(np.min(prev_pbest) - np.min(select_time_pbest))
     expected_gain = np.clip(
         (0.6 * d_fit + 0.3 * d_pbest + 0.1 * global_gain) / max(scale, 1e-12), -1.0, 1.0
     )
@@ -320,3 +324,134 @@ def test_screening_verdict_semantics() -> None:
     df4 = df.copy()
     df4.loc[df4["algorithm"] == "cgl_full", "log10_error"] = 2.0    # clearly worse than ring/gbest
     assert screening_verdict(df4)["passed"] is False
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for the four review findings (2026-10-20)
+# ---------------------------------------------------------------------------
+def test_global_best_gain_uses_min_not_max() -> None:
+    """Regression (review P0): the global-best term must use min for minimisation.
+
+    The previous implementation used ``max(pbest)`` and therefore credited edges
+    with the *worst* particle's movement. The test below constructs a step where the
+    two formulas differ and asserts the stored contribution matches the min-based
+    (correct) definition.
+    """
+    cfg = _cfg(n=6, dim=4, iters=3)
+    pol = make_cgl_policy("cgl_full", cfg, seed=0)
+    obj = CountingObjective(make_function("sphere", 4, seed=1), max_fes=None)
+    eng = PSOEngine(obj, cfg, pol, seed=0)
+    state = eng.initialize()
+    state = eng.step()
+    prev_pbest = pol._pending.pbest_val.copy()
+    prev_fit = pol._pending.fitness.copy()
+    scale = pol._pending.scale
+    src = pol.graph._pending_src.copy()
+    dst = pol.graph._pending_dst.copy()
+    select_time_pbest = state.pbest_val.copy()
+    select_time_fit = state.fitness.copy()
+    eng.step()
+
+    d_fit = prev_fit - select_time_fit
+    d_fit = d_fit - np.mean(d_fit)
+    d_pbest = prev_pbest - select_time_pbest
+    d_pbest = d_pbest - np.mean(d_pbest)
+    gain_min = np.clip((0.6 * d_fit + 0.3 * d_pbest + 0.1 * (np.min(prev_pbest) - np.min(select_time_pbest))) / scale, -1, 1)
+    gain_max = np.clip((0.6 * d_fit + 0.3 * d_pbest + 0.1 * (np.max(prev_pbest) - np.max(select_time_pbest))) / scale, -1, 1)
+    assert not np.allclose(gain_min, gain_max), "the test step must distinguish min from max"
+    for s_i, d_i, g in zip(src, dst, gain_min):
+        assert pol.graph.Q[s_i, d_i] == pytest.approx(0.3 * g, abs=1e-9)
+
+
+def test_stagnation_penalty_only_touches_stalled_particles() -> None:
+    """Regression (review P0): M3 is stagnation-triggered, so non-stalled particles
+    must receive exactly the same scores whether the refresh is enabled or not."""
+    cfg = _cfg(n=8, dim=4, iters=6)
+    for variant, use_refresh in (("cgl_full", True), ("cgl_norefresh", False)):
+        pol = make_cgl_policy(variant, cfg, seed=0, stall_threshold=2)
+        obj = CountingObjective(make_function("sphere", 4, seed=1), max_fes=None)
+        eng = PSOEngine(obj, cfg, pol, seed=0)
+        state = eng.initialize()
+        for _ in range(3):
+            state = eng.step()
+        # force a mixed population and make the historical edges unproductive
+        state.stall[:] = 0.0
+        state.stall[:4] = 5.0                     # first half stalled, second half improving
+        pol.graph.Q[:] = -0.5
+        pol.graph.n_used[:] = 1
+        pol.graph.last_used[:] = state.iteration
+        order = np.argsort(state.pbest_val, kind="stable")
+        rank_of = np.empty(state.n, dtype=np.float64)
+        rank_of[order] = np.arange(state.n)
+        cands = build_candidates(state.pos, state.pbest_val, eng.ctx.bounds, np.random.default_rng(0),
+                                 pbest_order=order)
+        score, eps, diag = pol._score_candidates(state, cands, stalled=state.stall >= pol.stall_threshold,
+                                                 ranks=rank_of / max(state.n - 1, 1))
+        if use_refresh:
+            stalled_mask = state.stall >= pol.stall_threshold
+            # non-stalled rows keep their unpenalised scores -> compare against the
+            # same computation with refresh disabled
+            pol2 = make_cgl_policy("cgl_norefresh", cfg, seed=0)
+            pol2.graph = pol.graph
+            score_ref, _, _ = pol2._score_candidates(state, cands, stalled=stalled_mask,
+                                                     ranks=rank_of / max(state.n - 1, 1))
+            for i in range(state.n):
+                if not stalled_mask[i]:
+                    valid = cands.mask[i]
+                    assert np.allclose(score[i][valid], score_ref[i][valid]), f"non-stalled row {i} was penalised"
+            penalised = [
+                i for i in range(state.n)
+                if stalled_mask[i] and not np.allclose(score[i][cands.mask[i]], score_ref[i][cands.mask[i]])
+            ]
+            assert penalised, "stalled particles must actually be penalised"
+
+
+def test_farthest_candidate_is_truly_farthest_and_never_self() -> None:
+    """Regression (review P1): a self-draw used to win the argmax of the long-range
+    slot (distance was set to +inf) and was then silently filtered out."""
+    cfg = _cfg(n=6, dim=3)
+    rng = np.random.default_rng(0)
+    pos = rng.random((6, 3)) * 10.0
+    pbest = rng.random(6)
+    bounds = make_function("sphere", 3, seed=0).bounds
+    for seed in range(5):
+        cs = build_candidates(pos, pbest, bounds, np.random.default_rng(seed),
+                              n_far_samples=40, top_q=0, ring_radius=0, n_random=0)
+        far_source = CANDIDATE_SOURCES.index("far")
+        assert cs.n_candidates.min() == 1
+        for i in range(6):
+            slot = int(np.flatnonzero(cs.source[i] == far_source)[0])
+            chosen = int(cs.idx[i, slot])
+            assert chosen != i, "the long-range slot must never be the particle itself"
+            d = np.linalg.norm(pos[chosen] - pos[i])
+            d_best_non_self = np.max([np.linalg.norm(pos[j] - pos[i]) for j in range(6) if j != i])
+            assert d == pytest.approx(d_best_non_self), "with 40 samples of 6 particles the farthest must be found"
+
+
+def test_self_candidate_is_optional() -> None:
+    """Regression (review P1): ring allows the neighbourhood best to be the particle
+    itself; CGL removed self unconditionally. It is now an explicit ablation."""
+    cfg = _cfg(n=6, dim=3)
+    rng = np.random.default_rng(1)
+    pos = rng.random((6, 3))
+    pbest = rng.random(6)
+    bounds = make_function("sphere", 3, seed=0).bounds
+    no_self = build_candidates(pos, pbest, bounds, np.random.default_rng(2), include_self=False)
+    with_self = build_candidates(pos, pbest, bounds, np.random.default_rng(2), include_self=True)
+    self_source = CANDIDATE_SOURCES.index("self")
+    for i in range(6):
+        assert i not in no_self.idx[i][no_self.mask[i]].tolist()
+        targets = with_self.idx[i][with_self.mask[i]].tolist()
+        assert targets.count(i) == 1, "exactly one self slot per particle"
+        slot = int(np.flatnonzero(with_self.source[i] == self_source)[0])
+        assert int(with_self.idx[i, slot]) == i and bool(with_self.mask[i, slot])
+
+    # policy level: with the switch on, a particle may choose its own pbest
+    pol = make_cgl_policy("cgl_full", cfg, seed=0, allow_self_candidate=True)
+    assert pol.allow_self_candidate is True
+    obj = CountingObjective(make_function("sphere", 3, seed=1), max_fes=None)
+    eng = PSOEngine(obj, cfg, pol, seed=0)
+    state = eng.initialize()
+    for _ in range(30):
+        state = eng.step()
+    assert pol.summary()["allow_self_candidate"] is True
