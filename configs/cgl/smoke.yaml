@@ -1,0 +1,54 @@
+# CGL-PSO smoke configuration: seconds-scale end-to-end check on CPU.
+seed: 0
+device: cpu
+threads: 6
+run_name: cgl_smoke
+results_dir: results
+objective:
+  name: sphere
+  dim: 10
+optimizer:
+  n_particles: 20
+  iters: 80
+  w: 0.7298
+  c1: 1.49445
+  c2: 1.49445
+  vmax_frac: 0.2
+  boundary: clip
+  init: uniform
+cgl:
+  alpha: 1.0
+  beta: 1.0
+  gamma: 0.6
+  novelty: 0.25
+  temperature: 0.5
+  epsilon: 0.15
+  epsilon_stalled: 0.4
+  stall_threshold: 10
+  refresh_penalty: 1.0
+  gain_discount: 0.7
+  gain_weights: [0.6, 0.3, 0.1]
+  # Pilot diagnosis: per-iteration improvements share a large common component
+  # across particles; removing the swarm mean leaves the relative (attributable)
+  # part. Frozen after the pilot, see docs/CGL_METHOD.md section 3.
+  gain_common_mode_removal: true
+  ring_radius: 1
+  top_q: 4
+  n_random: 2
+  n_far_samples: 8
+screening:
+  pilot: {tasks: [sphere, rastrigin, ackley], seeds: [0, 1, 2], fes: 5000, dim: 10}
+  dev10: {tasks: [rosenbrock, griewank, zakharov, alpine1], seeds: [0, 1, 2], fes: 3000, dim: 10}
+  algorithms: [ring, gbest, quality_rank, cgl_nocontrib, cgl_full]
+budget:
+  max_total_fes: 4000000
+  max_algorithms_dev10: 8
+resources:
+  enabled: true
+  log_period_s: 2.0
+  ram_soft_pct: 90.0
+  ram_hard_pct: 95.0
+  cpu_soft_pct: 90.0
+  cpu_hard_pct: 95.0
+  gpu_soft_c: 82.0
+  gpu_hard_c: 85.0

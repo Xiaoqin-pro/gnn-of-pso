@@ -1,0 +1,104 @@
+{
+  "candidate": "cgl_full",
+  "ablation": "cgl_nocontrib",
+  "criterion": ">= 3/3 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+  "tasks_improved_vs_ablation": 2,
+  "n_tasks": 3,
+  "tasks_clearly_worse_than_classics": 2,
+  "median_runtime_factor_vs_classics": 7.5076846043386745,
+  "passed": false,
+  "vs_ablation": [
+    {
+      "task": "ackley",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": -0.03356773579073077,
+      "delta_median": -0.026821845192284588,
+      "wins": 2,
+      "losses": 1
+    },
+    {
+      "task": "rastrigin",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.035603385159372745,
+      "delta_median": 0.04865979108736207,
+      "wins": 1,
+      "losses": 2
+    },
+    {
+      "task": "sphere",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.0046593604509868785,
+      "delta_median": -0.012033084316332099,
+      "wins": 2,
+      "losses": 1
+    }
+  ],
+  "vs_classics": [
+    {
+      "task": "ackley",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.17542443425893975,
+      "delta_median": 0.17206376814211954,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "rastrigin",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.08481788146948215,
+      "delta_median": 0.07333487726571297,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "sphere",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.9047591962416747,
+      "delta_median": 0.9092068333464586,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "ackley",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.496834864393852,
+      "delta_median": 0.485860726296928,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "rastrigin",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.42619698982126825,
+      "delta_median": 0.43860789217267393,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "sphere",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 2.0284944164995156,
+      "delta_median": 2.1903306586354803,
+      "wins": 0,
+      "losses": 3
+    }
+  ]
+}

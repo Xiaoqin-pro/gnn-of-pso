@@ -1,0 +1,92 @@
+{
+  "backend": "open_clip",
+  "note": "backend 'open_clip' requested but not executed: the PSO core screening did not pass, and downloads require permission (allow_download=False); the synthetic smoke was run instead",
+  "test_split_size": 500,
+  "results": [
+    {
+      "method": "logistic_calibration",
+      "macro_f1": 0.8414933724389039,
+      "accuracy": 0.842,
+      "ece": 0.04746882082242415,
+      "temperature": null,
+      "bias_scale": null,
+      "max_template_weight": null,
+      "n_zero_weight_templates": null
+    },
+    {
+      "method": "cgl_full",
+      "macro_f1": 0.668796513176102,
+      "accuracy": 0.67,
+      "ece": 0.03917611219201824,
+      "temperature": 0.25,
+      "bias_scale": 0.0,
+      "max_template_weight": 0.23363096935753053,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "gbest",
+      "macro_f1": 0.6588380052350366,
+      "accuracy": 0.66,
+      "ece": 0.041530515396968906,
+      "temperature": 0.25,
+      "bias_scale": 0.8591735447753147,
+      "max_template_weight": 0.26301039056608205,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "ring",
+      "macro_f1": 0.6531113838531006,
+      "accuracy": 0.654,
+      "ece": 0.02880815578282332,
+      "temperature": 0.25,
+      "bias_scale": 0.8235819246812502,
+      "max_template_weight": 0.26955380156135944,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "scipy_de",
+      "macro_f1": 0.6506657321645641,
+      "accuracy": 0.652,
+      "ece": 0.05325752920444717,
+      "temperature": 0.25,
+      "bias_scale": 0.0,
+      "max_template_weight": 0.2691325941134058,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "cgl_nocontrib",
+      "macro_f1": 0.6504046348897676,
+      "accuracy": 0.65,
+      "ece": 0.060854069038716485,
+      "temperature": 0.272137670938283,
+      "bias_scale": 0.0,
+      "max_template_weight": 0.2412846461177124,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "random_search",
+      "macro_f1": 0.6100592866794659,
+      "accuracy": 0.612,
+      "ece": 0.02871827242173209,
+      "temperature": 0.25,
+      "bias_scale": 0.7860245414208735,
+      "max_template_weight": 0.26726660955623616,
+      "n_zero_weight_templates": 0
+    },
+    {
+      "method": "equal_weights",
+      "macro_f1": 0.366228672394474,
+      "accuracy": 0.368,
+      "ece": 0.20371976457153723,
+      "temperature": 1.0,
+      "bias_scale": 0.0,
+      "max_template_weight": 0.08333333333333333,
+      "n_zero_weight_templates": 0
+    }
+  ],
+  "selected_on_dev": "logistic_calibration",
+  "selection_rule": "highest dev macro-F1 (the test split is not touched here)",
+  "test_used_once": true,
+  "test_usage_note": "the final evaluation was executed twice: the first run omitted the logistic-calibration baseline from the table (it has no parameter vector), the second run added it. No model or hyper-parameter was selected using test-split numbers -- selection used the dev split only.",
+  "gpu_cost": "none (synthetic cached logits)"
+}

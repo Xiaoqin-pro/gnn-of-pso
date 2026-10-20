@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cgl-pso"
+version = "1.0.0"
+description = "CGL-PSO: Contribution-Guided Graph Learning Particle Swarm Optimization (development-stage research code, negative-result record included)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["particle swarm optimization", "online graph learning", "credit assignment", "black-box optimization"]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "scikit-learn>=1.3",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+  "psutil>=5.9",
+  "PyYAML>=6.0",
+  "typer>=0.12",
+  # only the reused infrastructure (seeding / CUDA resource logging) imports torch;
+  # the CGL algorithm itself is pure NumPy
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+cgl = "cgl_pso.cli:app"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = ["slow: long running tests"]

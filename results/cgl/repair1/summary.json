@@ -1,0 +1,80 @@
+{
+  "tag": "repair1",
+  "n_runs": 48,
+  "tasks": [
+    "rosenbrock",
+    "griewank",
+    "zakharov",
+    "alpine1"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "dim": 30,
+  "fes": 10000,
+  "total_fes": 480000,
+  "algorithms": [
+    "cgl_full",
+    "cgl_nocontrib",
+    "gbest",
+    "ring"
+  ],
+  "verdict": {
+    "candidate": "cgl_full",
+    "ablation": "cgl_nocontrib",
+    "criterion": ">= 3/4 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+    "tasks_improved_vs_ablation": 1,
+    "n_tasks": 4,
+    "tasks_clearly_worse_than_classics": 3,
+    "median_runtime_factor_vs_classics": 5.835463026632139,
+    "passed": false
+  },
+  "artifacts": {
+    "raw": "results\\cgl\\repair1\\runs.jsonl",
+    "runs_csv": "results\\cgl\\repair1\\runs.csv",
+    "per_function": "results\\cgl\\repair1\\per_function.csv",
+    "auc": "results\\cgl\\repair1\\auc.csv",
+    "verdict": "results\\cgl\\repair1\\verdict.json"
+  },
+  "wall_time_s": 7.63,
+  "raw_path": "results\\cgl\\repair1\\runs.jsonl",
+  "resource_summary": {
+    "n_samples": 2,
+    "duration_s": 5.08,
+    "cpu_pct": {
+      "mean": 2.5,
+      "max": 5.0,
+      "min": 0.0
+    },
+    "ram_pct": {
+      "mean": 71.3,
+      "max": 71.3,
+      "min": 71.3
+    },
+    "gpu_temp_c": {
+      "mean": 48.0,
+      "max": 48.0,
+      "min": 48.0
+    },
+    "gpu_util_pct": {
+      "mean": 7.0,
+      "max": 7.0,
+      "min": 7.0
+    },
+    "vram_alloc_gb": {
+      "mean": 0.0,
+      "max": 0.0,
+      "min": 0.0
+    },
+    "proc_rss_gb": {
+      "mean": 0.392,
+      "max": 0.394,
+      "min": 0.39
+    },
+    "csv": "results\\logs\\resources_cgl_repair1.csv",
+    "jsonl": "results\\logs\\resources_cgl_repair1.jsonl"
+  },
+  "guard_events": 0
+}

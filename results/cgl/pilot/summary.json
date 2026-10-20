@@ -1,0 +1,83 @@
+{
+  "tag": "pilot",
+  "n_runs": 72,
+  "tasks": [
+    "sphere",
+    "rastrigin",
+    "ackley"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "dim": 30,
+  "fes": 5000,
+  "total_fes": 360000,
+  "algorithms": [
+    "cgl_full",
+    "cgl_nocontrib",
+    "cgl_nodirection",
+    "cgl_norefresh",
+    "gbest",
+    "gldi_rule",
+    "quality_rank",
+    "ring"
+  ],
+  "verdict": {
+    "candidate": "cgl_full",
+    "ablation": "cgl_nocontrib",
+    "criterion": ">= 3/3 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+    "tasks_improved_vs_ablation": 2,
+    "n_tasks": 3,
+    "tasks_clearly_worse_than_classics": 2,
+    "median_runtime_factor_vs_classics": 7.5076846043386745,
+    "passed": false
+  },
+  "artifacts": {
+    "raw": "results\\cgl\\pilot\\runs.jsonl",
+    "runs_csv": "results\\cgl\\pilot\\runs.csv",
+    "per_function": "results\\cgl\\pilot\\per_function.csv",
+    "auc": "results\\cgl\\pilot\\auc.csv",
+    "verdict": "results\\cgl\\pilot\\verdict.json"
+  },
+  "wall_time_s": 9.86,
+  "raw_path": "results\\cgl\\pilot\\runs.jsonl",
+  "resource_summary": {
+    "n_samples": 2,
+    "duration_s": 5.09,
+    "cpu_pct": {
+      "mean": 2.05,
+      "max": 4.1,
+      "min": 0.0
+    },
+    "ram_pct": {
+      "mean": 63.95,
+      "max": 64.0,
+      "min": 63.9
+    },
+    "gpu_temp_c": {
+      "mean": 46.5,
+      "max": 47.0,
+      "min": 46.0
+    },
+    "gpu_util_pct": {
+      "mean": 15.0,
+      "max": 15.0,
+      "min": 15.0
+    },
+    "vram_alloc_gb": {
+      "mean": 0.0,
+      "max": 0.0,
+      "min": 0.0
+    },
+    "proc_rss_gb": {
+      "mean": 0.394,
+      "max": 0.396,
+      "min": 0.392
+    },
+    "csv": "results\\logs\\resources_cgl_pilot.csv",
+    "jsonl": "results\\logs\\resources_cgl_pilot.jsonl"
+  },
+  "guard_events": 0
+}

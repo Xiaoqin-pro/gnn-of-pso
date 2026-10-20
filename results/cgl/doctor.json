@@ -1,0 +1,330 @@
+{
+  "cgl_pso": "0.1.0",
+  "gldi_pso": "0.1.0",
+  "python": "3.13.7",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "checkpoint_dir": "results/cgl",
+  "hardware": {
+    "platform": "Windows-11-10.0.22631-SP0",
+    "python": "3.13.7",
+    "machine": "AMD64",
+    "cpu": {
+      "model": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+      "physical_cores": 8,
+      "logical_cores": 16,
+      "max_freq_mhz": 3801.0,
+      "temperature_c": null,
+      "temperature_note": "no CPU temperature sensor exposed to psutil on this host"
+    },
+    "ram": {
+      "total_gb": 16.41,
+      "available_gb": 5.99,
+      "used_pct": 63.5
+    },
+    "disk_free_gb": {
+      "C:\\": 70.9,
+      "D:\\": 347.4,
+      "/": 347.4
+    },
+    "gpu": {
+      "available": true,
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "driver_version": "556.12",
+      "memory_total_mib": 8188.0,
+      "memory_used_mib": 1115.0,
+      "memory_free_mib": 6843.0,
+      "temperature_c": 46.0,
+      "utilization_pct": 16.0
+    },
+    "torch": {
+      "version": "2.7.1+cu118",
+      "cuda_build": "11.8",
+      "cuda_available": true,
+      "device_count": 1,
+      "devices": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+          "capability": "8.9",
+          "total_memory_gb": 8.59
+        }
+      ],
+      "threads": 8
+    }
+  },
+  "checks": [
+    {
+      "name": "dep:numpy",
+      "ok": true,
+      "detail": "2.4.4"
+    },
+    {
+      "name": "dep:pandas",
+      "ok": true,
+      "detail": "2.3.2"
+    },
+    {
+      "name": "dep:scipy",
+      "ok": true,
+      "detail": "1.17.1"
+    },
+    {
+      "name": "dep:matplotlib",
+      "ok": true,
+      "detail": "3.10.8"
+    },
+    {
+      "name": "dep:psutil",
+      "ok": true,
+      "detail": "7.2.2"
+    },
+    {
+      "name": "dep:sklearn",
+      "ok": true,
+      "detail": "1.8.0"
+    },
+    {
+      "name": "dep:torch",
+      "ok": true,
+      "detail": "2.7.1+cu118"
+    },
+    {
+      "name": "dep:torchvision",
+      "ok": true,
+      "detail": "0.22.1+cu118"
+    },
+    {
+      "name": "dep:clip",
+      "ok": true,
+      "detail": "installed"
+    },
+    {
+      "name": "dep:open_clip",
+      "ok": false,
+      "detail": "ModuleNotFoundError: No module named 'open_clip'"
+    },
+    {
+      "name": "config:smoke",
+      "ok": true,
+      "detail": "cgl_smoke"
+    },
+    {
+      "name": "config:dev10",
+      "ok": true,
+      "detail": "cgl_dev10"
+    },
+    {
+      "name": "doc:CGL_LITERATURE.md",
+      "ok": true,
+      "detail": "6408 bytes"
+    },
+    {
+      "name": "doc:CGL_METHOD.md",
+      "ok": true,
+      "detail": "6948 bytes"
+    },
+    {
+      "name": "doc:CGL_PROTOCOL.md",
+      "ok": true,
+      "detail": "6760 bytes"
+    }
+  ],
+  "config_ok": true,
+  "config": {
+    "seed": 0,
+    "device": "cpu",
+    "threads": 6,
+    "run_name": "cgl_smoke",
+    "results_dir": "results",
+    "objective": {
+      "name": "sphere",
+      "dim": 10,
+      "bounds": null,
+      "shift": 0.0,
+      "rotate": false,
+      "instance_seed": 12345
+    },
+    "optimizer": {
+      "kind": "gldi",
+      "n_particles": 20,
+      "iters": 80,
+      "w": 0.7298,
+      "c1": 1.49445,
+      "c2": 1.49445,
+      "vmax_frac": 0.2,
+      "boundary": "clip",
+      "init": "uniform",
+      "init_vel_frac": 0.1,
+      "ring_radius": 1,
+      "fips_neighbors": 2,
+      "clpso_pc": 0.5,
+      "clpso_refresh_gap": 7,
+      "fips_weights": "uniform",
+      "graph": {
+        "k_quality": 3,
+        "k_dist": 1,
+        "k_random_far": 2,
+        "fixed": false,
+        "rebuild_period": 1,
+        "distance_quantile": 0.5
+      },
+      "model": {
+        "hidden": 32,
+        "heads": 4,
+        "layers": 2,
+        "dropout": 0.0,
+        "residual": true
+      }
+    },
+    "rl": {
+      "enabled": false,
+      "algo": "ppo",
+      "lr": 0.0003,
+      "gamma": 0.99,
+      "lam": 0.95,
+      "clip": 0.2,
+      "entropy_coef": 0.01,
+      "value_coef": 0.5,
+      "epochs": 4,
+      "minibatch_particles": 2048,
+      "episodes_per_update": 8,
+      "updates": 200,
+      "max_grad_norm": 0.5,
+      "target_kl": 0.03,
+      "reward_scale": "gap",
+      "train_functions": [
+        "sphere",
+        "rastrigin",
+        "ackley",
+        "rosenbrock"
+      ],
+      "train_dims": [
+        10,
+        20
+      ],
+      "train_particles": [
+        20,
+        40
+      ],
+      "eval_every": 10,
+      "value_clip": 10.0,
+      "policy": "gnn"
+    },
+    "resources": {
+      "enabled": true,
+      "log_period_s": 2.0,
+      "cpu_soft_pct": 90.0,
+      "cpu_hard_pct": 95.0,
+      "ram_soft_pct": 90.0,
+      "ram_hard_pct": 95.0,
+      "gpu_soft_c": 82.0,
+      "gpu_hard_c": 85.0,
+      "vram_budget_gb": 6.0,
+      "gpu_reserve_gb": 0.5,
+      "check_every_steps": 1,
+      "max_batch_scale": 4.0,
+      "min_batch_scale": 0.25
+    },
+    "benchmark": {
+      "algorithms": [
+        "gbest",
+        "ring",
+        "fips",
+        "clpso",
+        "rank",
+        "random",
+        "gldi_rule",
+        "gldi_ppo"
+      ],
+      "functions": [
+        "sphere",
+        "rastrigin",
+        "ackley",
+        "rosenbrock"
+      ],
+      "dim": 10,
+      "repetitions": 30,
+      "fes_budget": 60000,
+      "success_tolerance": 1e-08,
+      "tier": "preliminary",
+      "suite": "synthetic",
+      "checkpoints": 20
+    },
+    "robot": {
+      "enabled": false,
+      "urdf": "kuka_iiwa/model.urdf",
+      "obstacles": true,
+      "n_waypoints": 12,
+      "n_control_points": 5,
+      "collision_samples": 9,
+      "iterations": 60,
+      "pop_size": 32,
+      "length_weight": 1.0,
+      "smoothness_weight": 0.3,
+      "collision_weight": 100.0
+    },
+    "cgl": {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "gamma": 0.6,
+      "novelty": 0.25,
+      "temperature": 0.5,
+      "epsilon": 0.15,
+      "epsilon_stalled": 0.4,
+      "stall_threshold": 10,
+      "refresh_penalty": 1.0,
+      "gain_discount": 0.7,
+      "gain_weights": [
+        0.6,
+        0.3,
+        0.1
+      ],
+      "ring_radius": 1,
+      "top_q": 4,
+      "n_random": 2,
+      "n_far_samples": 8
+    },
+    "screening": {
+      "pilot": {
+        "tasks": [
+          "sphere",
+          "rastrigin",
+          "ackley"
+        ],
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "fes": 5000,
+        "dim": 10
+      },
+      "dev10": {
+        "tasks": [
+          "rosenbrock",
+          "griewank",
+          "zakharov",
+          "alpine1"
+        ],
+        "seeds": [
+          0,
+          1,
+          2
+        ],
+        "fes": 3000,
+        "dim": 10
+      },
+      "algorithms": [
+        "ring",
+        "gbest",
+        "quality_rank",
+        "cgl_nocontrib",
+        "cgl_full"
+      ]
+    },
+    "budget": {
+      "max_total_fes": 4000000,
+      "max_algorithms_dev10": 8
+    }
+  }
+}

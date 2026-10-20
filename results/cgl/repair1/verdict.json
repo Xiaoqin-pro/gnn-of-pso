@@ -1,0 +1,134 @@
+{
+  "candidate": "cgl_full",
+  "ablation": "cgl_nocontrib",
+  "criterion": ">= 3/4 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+  "tasks_improved_vs_ablation": 1,
+  "n_tasks": 4,
+  "tasks_clearly_worse_than_classics": 3,
+  "median_runtime_factor_vs_classics": 5.835463026632139,
+  "passed": false,
+  "vs_ablation": [
+    {
+      "task": "alpine1",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.007200452186306272,
+      "delta_median": -0.024090715557355313,
+      "wins": 2,
+      "losses": 1
+    },
+    {
+      "task": "griewank",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.12249645649921492,
+      "delta_median": 0.18467582040007124,
+      "wins": 1,
+      "losses": 2
+    },
+    {
+      "task": "rosenbrock",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.1407964800525622,
+      "delta_median": 0.035648280402946764,
+      "wins": 1,
+      "losses": 2
+    },
+    {
+      "task": "zakharov",
+      "reference": "cgl_nocontrib",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.13919723535804188,
+      "delta_median": 0.1539322498621465,
+      "wins": 1,
+      "losses": 2
+    }
+  ],
+  "vs_classics": [
+    {
+      "task": "alpine1",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.2437319388399476,
+      "delta_median": 0.21287773395890408,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "griewank",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.8064774395554893,
+      "delta_median": 0.8534131597731278,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "rosenbrock",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.15241871447598973,
+      "delta_median": 0.11522345865315531,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "zakharov",
+      "reference": "ring",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": -0.1618742027389628,
+      "delta_median": -0.17831809928759834,
+      "wins": 3,
+      "losses": 0
+    },
+    {
+      "task": "alpine1",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.6116472335316073,
+      "delta_median": 0.6613582490870433,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "griewank",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 1.5418289885450294,
+      "delta_median": 1.4159219274140806,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "rosenbrock",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.4753463737997264,
+      "delta_median": 0.18093257116258843,
+      "wins": 0,
+      "losses": 3
+    },
+    {
+      "task": "zakharov",
+      "reference": "gbest",
+      "algorithm": "cgl_full",
+      "n_seeds": 3,
+      "delta_mean": 0.298795839215908,
+      "delta_median": 0.32004327873252136,
+      "wins": 0,
+      "losses": 3
+    }
+  ]
+}

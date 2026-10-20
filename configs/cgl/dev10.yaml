@@ -1,0 +1,66 @@
+# CGL-PSO pre-registered development screening (see docs/CGL_PROTOCOL.md).
+seed: 0
+device: cpu
+threads: 6
+run_name: cgl_dev10
+results_dir: results
+objective:
+  name: rosenbrock
+  dim: 30
+optimizer:
+  n_particles: 40
+  iters: 249            # 40 * (249 + 1) = 10,000 FEs
+  w: 0.7298
+  c1: 1.49445
+  c2: 1.49445
+  vmax_frac: 0.2
+  boundary: clip
+  init: uniform
+cgl:                    # frozen after the pilot (see CGL_PROTOCOL.md)
+  alpha: 1.0
+  beta: 1.0
+  gamma: 0.6
+  novelty: 0.25
+  temperature: 0.5
+  epsilon: 0.15
+  epsilon_stalled: 0.4
+  stall_threshold: 12
+  refresh_penalty: 1.0
+  gain_discount: 0.7
+  gain_weights: [0.6, 0.3, 0.1]
+  # Pilot diagnosis: per-iteration improvements share a large common component
+  # across particles; removing the swarm mean leaves the relative (attributable)
+  # part. Frozen after the pilot, see docs/CGL_METHOD.md section 3.
+  gain_common_mode_removal: true
+  ring_radius: 1
+  top_q: 4
+  n_random: 2
+  n_far_samples: 8
+screening:
+  pilot:
+    tasks: [sphere, rastrigin, ackley]      # pilot instances only
+    seeds: [0, 1, 2]
+    fes: 5000
+    dim: 30
+  dev10:
+    tasks: [rosenbrock, griewank, zakharov, alpine1]   # pre-registered, disjoint from pilot
+    seeds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]              # paired seeds
+    fes: 10000
+    dim: 30
+  algorithms: [ring, gbest, gldi_rule, quality_rank, cgl_nocontrib, cgl_nodirection, cgl_norefresh, cgl_full]
+  instance_seed_base: 70000    # fresh namespace; disjoint from stages 1-3
+budget:
+  max_total_fes: 4000000
+  max_algorithms_dev10: 8
+  max_repair_rounds: 1
+resources:
+  enabled: true
+  log_period_s: 5.0
+  ram_soft_pct: 90.0
+  ram_hard_pct: 95.0
+  cpu_soft_pct: 90.0
+  cpu_hard_pct: 95.0
+  gpu_soft_c: 82.0
+  gpu_hard_c: 85.0
+  vram_budget_gb: 6.0
+  gpu_reserve_gb: 0.5

@@ -1,0 +1,3 @@
+t,cpu_pct,ram_pct,ram_used_gb,ram_available_gb,gpu_util_pct,gpu_temp_c,gpu_mem_used_mib,gpu_mem_free_mib,vram_alloc_gb,proc_rss_gb
+1792495994.539984,0.0,63.9,10.485,5.922,15.0,46.0,1116.0,6842.0,0.0,0.392
+1792495999.6319356,4.1,64.0,10.494,5.913,15.0,47.0,1116.0,6842.0,0.0,0.396

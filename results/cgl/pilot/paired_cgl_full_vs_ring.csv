@@ -1,0 +1,4 @@
+task,reference,algorithm,n_seeds,delta_mean,delta_median,wins,losses
+ackley,ring,cgl_full,3,0.17542443425893975,0.17206376814211954,0,3
+rastrigin,ring,cgl_full,3,0.08481788146948215,0.07333487726571297,0,3
+sphere,ring,cgl_full,3,0.9047591962416747,0.9092068333464586,0,3

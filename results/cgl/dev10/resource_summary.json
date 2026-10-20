@@ -1,0 +1,36 @@
+{
+  "n_samples": 13,
+  "duration_s": 61.1,
+  "cpu_pct": {
+    "mean": 4.738,
+    "max": 6.6,
+    "min": 0.0
+  },
+  "ram_pct": {
+    "mean": 67.677,
+    "max": 69.7,
+    "min": 67.2
+  },
+  "gpu_temp_c": {
+    "mean": 47.308,
+    "max": 48.0,
+    "min": 47.0
+  },
+  "gpu_util_pct": {
+    "mean": 10.0,
+    "max": 31.0,
+    "min": 7.0
+  },
+  "vram_alloc_gb": {
+    "mean": 0.0,
+    "max": 0.0,
+    "min": 0.0
+  },
+  "proc_rss_gb": {
+    "mean": 0.398,
+    "max": 0.399,
+    "min": 0.391
+  },
+  "csv": "results\\logs\\resources_cgl_dev10.csv",
+  "jsonl": "results\\logs\\resources_cgl_dev10.jsonl"
+}

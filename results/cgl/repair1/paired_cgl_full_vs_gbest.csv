@@ -1,0 +1,5 @@
+task,reference,algorithm,n_seeds,delta_mean,delta_median,wins,losses
+alpine1,gbest,cgl_full,3,0.6116472335316073,0.6613582490870433,0,3
+griewank,gbest,cgl_full,3,1.5418289885450294,1.4159219274140806,0,3
+rosenbrock,gbest,cgl_full,3,0.4753463737997264,0.18093257116258843,0,3
+zakharov,gbest,cgl_full,3,0.298795839215908,0.32004327873252136,0,3

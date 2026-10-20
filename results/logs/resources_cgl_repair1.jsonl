@@ -1,0 +1,2 @@
+{"t": 1792496483.8471804, "cpu_pct": 0.0, "ram_pct": 71.3, "ram_used_gb": 11.697, "ram_available_gb": 4.71, "gpu_util_pct": 7.0, "gpu_temp_c": 48.0, "gpu_mem_used_mib": 1029.0, "gpu_mem_free_mib": 6929.0, "vram_alloc_gb": 0.0, "proc_rss_gb": 0.39}
+{"t": 1792496488.9222877, "cpu_pct": 5.0, "ram_pct": 71.3, "ram_used_gb": 11.7, "ram_available_gb": 4.707, "gpu_util_pct": 7.0, "gpu_temp_c": 48.0, "gpu_mem_used_mib": 1030.0, "gpu_mem_free_mib": 6928.0, "vram_alloc_gb": 0.0, "proc_rss_gb": 0.394}

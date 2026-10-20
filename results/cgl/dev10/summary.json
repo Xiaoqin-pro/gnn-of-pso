@@ -1,0 +1,91 @@
+{
+  "tag": "dev10",
+  "n_runs": 320,
+  "tasks": [
+    "rosenbrock",
+    "griewank",
+    "zakharov",
+    "alpine1"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "dim": 30,
+  "fes": 10000,
+  "total_fes": 3200000,
+  "algorithms": [
+    "cgl_full",
+    "cgl_nocontrib",
+    "cgl_nodirection",
+    "cgl_norefresh",
+    "gbest",
+    "gldi_rule",
+    "quality_rank",
+    "ring"
+  ],
+  "verdict": {
+    "candidate": "cgl_full",
+    "ablation": "cgl_nocontrib",
+    "criterion": ">= 3/4 tasks with improved paired median log-error vs cgl_nocontrib, no task clearly worse than ring/gbest (median delta <= +0.5), median runtime <= 3.0x the faster classical baseline",
+    "tasks_improved_vs_ablation": 3,
+    "n_tasks": 4,
+    "tasks_clearly_worse_than_classics": 3,
+    "median_runtime_factor_vs_classics": 6.5209231372638,
+    "passed": false
+  },
+  "artifacts": {
+    "raw": "results\\cgl\\dev10\\runs.jsonl",
+    "runs_csv": "results\\cgl\\dev10\\runs.csv",
+    "per_function": "results\\cgl\\dev10\\per_function.csv",
+    "auc": "results\\cgl\\dev10\\auc.csv",
+    "verdict": "results\\cgl\\dev10\\verdict.json"
+  },
+  "wall_time_s": 65.05,
+  "raw_path": "results\\cgl\\dev10\\runs.jsonl",
+  "resource_summary": {
+    "n_samples": 13,
+    "duration_s": 61.1,
+    "cpu_pct": {
+      "mean": 4.738,
+      "max": 6.6,
+      "min": 0.0
+    },
+    "ram_pct": {
+      "mean": 67.677,
+      "max": 69.7,
+      "min": 67.2
+    },
+    "gpu_temp_c": {
+      "mean": 47.308,
+      "max": 48.0,
+      "min": 47.0
+    },
+    "gpu_util_pct": {
+      "mean": 10.0,
+      "max": 31.0,
+      "min": 7.0
+    },
+    "vram_alloc_gb": {
+      "mean": 0.0,
+      "max": 0.0,
+      "min": 0.0
+    },
+    "proc_rss_gb": {
+      "mean": 0.398,
+      "max": 0.399,
+      "min": 0.391
+    },
+    "csv": "results\\logs\\resources_cgl_dev10.csv",
+    "jsonl": "results\\logs\\resources_cgl_dev10.jsonl"
+  },
+  "guard_events": 0
+}

@@ -1,0 +1,17 @@
+algorithm,task,auc_log10_error,n
+cgl_full,alpine1,1.2451558612508038,3
+cgl_full,griewank,1.1593750322805698,3
+cgl_full,rosenbrock,2.353153629208769,3
+cgl_full,zakharov,1.9282194220914628,3
+cgl_nocontrib,alpine1,1.2469788795950911,3
+cgl_nocontrib,griewank,1.0770400154870547,3
+cgl_nocontrib,rosenbrock,2.2890567019957966,3
+cgl_nocontrib,zakharov,1.8248469275190307,3
+gbest,alpine1,0.8631938271486109,3
+gbest,griewank,0.30855173214497694,3
+gbest,rosenbrock,1.9917108659872589,3
+gbest,zakharov,1.794315464024626,3
+ring,alpine1,1.1382168669776147,3
+ring,griewank,0.7965225747988582,3
+ring,rosenbrock,2.3237442057568747,3
+ring,zakharov,2.075808506803526,3

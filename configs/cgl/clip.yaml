@@ -1,0 +1,58 @@
+# Frozen-VLM application configuration (CGL-PSO optimises template ensemble
+# weights + small calibration parameters on cached CLIP logits/features).
+seed: 0
+device: cpu
+threads: 6
+run_name: cgl_clip
+results_dir: results
+objective:
+  name: clip_calibration
+  dim: 16
+optimizer:
+  n_particles: 40
+  iters: 124            # 40 * (124 + 1) = 5,000 objective evaluations per run
+  w: 0.7298
+  c1: 1.49445
+  c2: 1.49445
+  vmax_frac: 0.2
+  boundary: clip
+  init: uniform
+cgl:
+  alpha: 1.0
+  beta: 1.0
+  gamma: 0.6
+  novelty: 0.25
+  temperature: 0.5
+  epsilon: 0.15
+  epsilon_stalled: 0.4
+  stall_threshold: 12
+  refresh_penalty: 1.0
+  gain_discount: 0.7
+  gain_weights: [0.6, 0.3, 0.1]
+clip:
+  backend: open_clip        # open_clip | openai_clip (cached) | synthetic
+  model: ViT-B-32
+  pretrained: laion2b_s34b_b79k
+  dataset: cifar10          # cifar10 | cifar100
+  data_root: data
+  n_templates: 12
+  n_calibration_params: 4   # temperature + per-class bias scale + ... (bounded)
+  batch_size: 64
+  max_samples: null         # null = full split
+  split: {calibration: 0.5, dev: 0.25, test: 0.25}
+  budget:
+    cli_objective_evals: 5000        # per optimiser run
+    comparison_budget: 5000          # unified for all compared methods
+    allow_download: false            # ask before downloading weights/data
+  synthetic: {n_classes: 10, n_per_class: 200, feature_dim: 512, seed: 0}
+resources:
+  enabled: true
+  log_period_s: 5.0
+  ram_soft_pct: 90.0
+  ram_hard_pct: 95.0
+  cpu_soft_pct: 90.0
+  cpu_hard_pct: 95.0
+  gpu_soft_c: 82.0
+  gpu_hard_c: 85.0
+  vram_budget_gb: 6.0
+  gpu_reserve_gb: 1.0
